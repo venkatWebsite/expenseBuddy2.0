@@ -34,6 +34,12 @@ export function getTransactions(): Transaction[] {
   return data ? JSON.parse(data) : [];
 }
 
+export function saveTransaction(transaction: Transaction) {
+  const transactions = getTransactions();
+  transactions.unshift(transaction);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+}
+
 export function deleteTransaction(id: string) {
   const transactions = getTransactions();
   const filtered = transactions.filter(t => t.id !== id);
