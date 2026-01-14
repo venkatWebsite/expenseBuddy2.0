@@ -121,6 +121,40 @@ export default function AddExpense() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 pb-24">
+          {/* Details Form (Date and Note moved up) */}
+          <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
+            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all relative">
+              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Transaction Date</p>
+                <input 
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none text-sm font-bold focus:ring-0 p-0"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Notes (Optional)</p>
+                <input 
+                  type="text" 
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="What was this for?" 
+                  className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:font-normal placeholder:text-muted-foreground/40"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Amount Hero Section */}
           <div className="bg-background rounded-[32px] p-8 shadow-sm border border-border/50 flex flex-col items-center">
              {/* Type Toggle */}
@@ -191,7 +225,6 @@ export default function AddExpense() {
             )}
           </AnimatePresence>
 
-          {/* Categories Grid */}
           <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Category</h3>
@@ -236,40 +269,6 @@ export default function AddExpense() {
                   </motion.div>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Details Form */}
-          <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all relative">
-              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Transaction Date</p>
-                <input 
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-sm font-bold focus:ring-0 p-0"
-                />
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Notes (Optional)</p>
-                <input 
-                  type="text" 
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="What was this for?" 
-                  className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:font-normal placeholder:text-muted-foreground/40"
-                />
-              </div>
             </div>
           </div>
 
