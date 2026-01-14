@@ -52,7 +52,7 @@ export default function AddExpense() {
 
     saveTransaction({
       id: Math.random().toString(36).substring(2, 9),
-      amount: parseFloat(amount),
+      amount: Math.round(parseFloat(amount) * 100) / 100,
       category: categoryObj.name,
       note: note || categoryObj.name,
       date: new Date().toISOString(),
