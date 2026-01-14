@@ -15,7 +15,10 @@ export default function Home() {
   const currency = profile?.currency || "₹";
 
   useEffect(() => {
-    setTransactions(getTransactions());
+    const tx = getTransactions();
+    // Sort transactions by date (newest first)
+    const sortedTx = [...tx].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setTransactions(sortedTx);
   }, []);
 
   const income = transactions
