@@ -1,16 +1,30 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import MobileContainer from "@/components/layout/mobile-container";
 import BottomNav from "@/components/ui/bottom-nav";
 import TransactionCard from "@/components/transaction-card";
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
-import { Bell, Search, TrendingUp, TrendingDown } from "lucide-react";
+import { getTransactions } from "@/lib/storage";
+import { Transaction } from "@/lib/mock-data";
+import { Bell, TrendingUp, TrendingDown, PlusCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 
 export default function Home() {
-  const totalBalance = 2450.50;
-  const income = 3200.00;
-  const expense = 749.50;
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    setTransactions(getTransactions());
+  }, []);
+
+  const income = transactions
+    .filter(t => t.type === 'income')
+    .reduce((acc, t) => acc + t.amount, 0);
+  
+  const expense = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((acc, t) => acc + t.amount, 0);
+
+  const totalBalance = income - expense;
 
   return (
     <>
@@ -44,7 +58,7 @@ export default function Home() {
 
           <div className="relative z-10">
             <p className="text-primary-foreground/80 text-sm font-medium mb-1">Total Balance</p>
-            <h1 className="text-4xl font-bold font-heading mb-6">${totalBalance.toLocaleString()}</h1>
+            <h1 className="text-4xl font-bold font-heading mb-6">${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h1>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl backdrop-blur-md">
@@ -53,7 +67,7 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-[10px] text-primary-foreground/70">Income</p>
-                  <p className="text-sm font-semibold">${income.toLocaleString()}</p>
+                  <p className="text-sm font-semibold">${income.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
 
@@ -63,7 +77,7 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-[10px] text-primary-foreground/70">Expense</p>
-                  <p className="text-sm font-semibold">${expense.toLocaleString()}</p>
+                  <p className="text-sm font-semibold">${expense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -73,13 +87,25 @@ export default function Home() {
         {/* Recent Transactions */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold font-heading">Transactions</h3>
-          <button className="text-sm text-primary font-medium hover:text-primary/80">See all</button>
+          {transactions.length > 0 && (
+            <button className="text-sm text-primary font-medium hover:text-primary/80">See all</button>
+          )}
         </div>
 
         <div className="space-y-2">
-          {MOCK_TRANSACTIONS.map((t, i) => (
-            <TransactionCard key={t.id} transaction={t} index={i} />
-          ))}
+          {transactions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center opacity-60">
+              <PlusCircle className="w-12 h-12 mb-4 text-muted-foreground stroke-[1]" />
+              <p className="text-sm">No transactions yet.<br />Add your first expense to get started.</p>
+              <Link href="/add">
+                <button className="mt-4 text-primary font-bold text-sm">Add Transaction</button>
+              </Link>
+            </div>
+          ) : (
+            transactions.map((t, i) => (
+              <TransactionCard key={t.id} transaction={t} index={i} />
+            ))
+          )}
         </div>
       </MobileContainer>
       
