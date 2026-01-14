@@ -18,6 +18,7 @@ export default function AddExpense() {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [note, setNote] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [type, setType] = useState<"expense" | "income">("expense");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [newCatName, setNewCatName] = useState("");
@@ -36,6 +37,7 @@ export default function AddExpense() {
         setAmount(tx.amount.toString());
         setSelectedCategory(cats.find(c => c.name === tx.category)?.id || cats[0].id);
         setNote(tx.note);
+        setDate(tx.date.split('T')[0]);
         setType(tx.type);
       }
     } else {
@@ -81,12 +83,12 @@ export default function AddExpense() {
     };
 
     if (editId) {
-      updateTransaction(editId, txData);
+      updateTransaction(editId, { ...txData, date: new Date(date).toISOString() });
     } else {
       saveTransaction({
         id: Math.random().toString(36).substring(2, 9),
         ...txData,
-        date: new Date().toISOString(),
+        date: new Date(date).toISOString(),
       });
     }
 
@@ -210,13 +212,18 @@ export default function AddExpense() {
 
           {/* Details Form */}
           <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
+            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all relative">
               <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
                 <Calendar className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Transaction Date</p>
-                <p className="text-sm font-bold">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</p>
+                <input 
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none text-sm font-bold focus:ring-0 p-0"
+                />
               </div>
             </div>
             
