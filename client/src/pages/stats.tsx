@@ -10,6 +10,7 @@ import * as Icons from "lucide-react";
 import { ChevronRight, Filter, PieChart as PieIcon, TrendingUp, BarChart3 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
+import { motion } from "framer-motion";
 
 export default function Stats() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -34,7 +35,8 @@ export default function Stats() {
       name: cat.name,
       value: amount,
       color: cat.color.split(' ')[1].replace('text-', ''),
-      originalColor: cat.color
+      originalColor: cat.color,
+      icon: cat.icon
     };
   }).filter(c => c.value > 0).sort((a, b) => b.value - a.value);
 

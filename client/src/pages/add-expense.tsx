@@ -72,7 +72,7 @@ export default function AddExpense() {
     e.preventDefault();
     if (!amount) return;
 
-    const categoryObj = categories.find(c => c.id === selectedCategory) || categories[0];
+    const categoryObj = categories.find(c => c.id === selectedCategory) || categories[0] || { name: "General", icon: "Tag", color: "bg-zinc-100 text-zinc-600" };
 
     const txData = {
       amount: Math.round(parseFloat(amount) * 100) / 100,
