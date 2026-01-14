@@ -23,7 +23,7 @@ function Router() {
       <Route path="/">
         {(params) => <ProtectedRoute component={Home} {...params} />}
       </Route>
-      <Route path="/add">
+      <Route path="/add/:id?">
         {(params) => <ProtectedRoute component={AddExpense} {...params} />}
       </Route>
       <Route path="/stats">

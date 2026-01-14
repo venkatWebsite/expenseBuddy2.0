@@ -6,6 +6,7 @@ import { getProfile } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { useLocation } from "wouter";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -13,6 +14,7 @@ interface TransactionCardProps {
 }
 
 export default function TransactionCard({ transaction, index }: TransactionCardProps) {
+  const [_, setLocation] = useLocation();
   const IconComponent = (Icons as any)[transaction.icon] || Icons.Tag;
   const profile = getProfile();
   const currency = profile?.currency || "₹";
@@ -23,6 +25,7 @@ export default function TransactionCard({ transaction, index }: TransactionCardP
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 10 }}
       transition={{ delay: index * 0.05, duration: 0.2 }}
+      onClick={() => setLocation(`/add/${transaction.id}`)}
       className="group flex items-center gap-4 p-5 bg-background rounded-3xl border border-border/50 shadow-sm active:scale-[0.98] transition-all hover:bg-secondary/20 cursor-pointer"
       data-testid={`transaction-card-${transaction.id}`}
     >

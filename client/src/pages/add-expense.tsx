@@ -3,14 +3,16 @@ import React, { useState, useEffect } from "react";
 import MobileContainer from "@/components/layout/mobile-container";
 import BottomNav from "@/components/ui/bottom-nav";
 import { CATEGORIES } from "@/lib/mock-data";
-import { saveTransaction, getCustomCategories, saveCategory, getProfile } from "@/lib/storage";
-import { useLocation } from "wouter";
-import { ArrowLeft, Calendar, FileText, Plus, Check } from "lucide-react";
+import { saveTransaction, getCustomCategories, saveCategory, getProfile, getTransactions, updateTransaction, deleteTransaction } from "@/lib/storage";
+import { useLocation, useRoute } from "wouter";
+import { ArrowLeft, Calendar, FileText, Plus, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AddExpense() {
+  const [match, params] = useRoute("/add/:id?");
+  const editId = params?.id;
   const [_, setLocation] = useLocation();
   const [amount, setAmount] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
@@ -26,8 +28,20 @@ export default function AddExpense() {
   useEffect(() => {
     const cats = getCustomCategories();
     setCategories(cats);
-    setSelectedCategory(cats[0].id);
-  }, []);
+    
+    if (editId) {
+      const allTx = getTransactions();
+      const tx = allTx.find(t => t.id === editId);
+      if (tx) {
+        setAmount(tx.amount.toString());
+        setSelectedCategory(cats.find(c => c.name === tx.category)?.id || cats[0].id);
+        setNote(tx.note);
+        setType(tx.type);
+      }
+    } else {
+      setSelectedCategory(cats[0].id);
+    }
+  }, [editId]);
 
   const handleAddCustom = () => {
     if (!newCatName) return;
@@ -44,22 +58,37 @@ export default function AddExpense() {
     setShowCustomInput(false);
   };
 
+  const handleDelete = () => {
+    if (editId) {
+      deleteTransaction(editId);
+      setLocation("/");
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount) return;
 
     const categoryObj = categories.find(c => c.id === selectedCategory) || categories[0];
 
-    saveTransaction({
-      id: Math.random().toString(36).substring(2, 9),
+    const txData = {
       amount: Math.round(parseFloat(amount) * 100) / 100,
       category: categoryObj.name,
       note: note || categoryObj.name,
-      date: new Date().toISOString(),
       type,
       icon: categoryObj.icon,
       color: categoryObj.color
-    });
+    };
+
+    if (editId) {
+      updateTransaction(editId, txData);
+    } else {
+      saveTransaction({
+        id: Math.random().toString(36).substring(2, 9),
+        ...txData,
+        date: new Date().toISOString(),
+      });
+    }
 
     setLocation("/");
   };
@@ -74,8 +103,18 @@ export default function AddExpense() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h2 className="text-xl font-bold font-heading">New Entry</h2>
-          <div className="w-11" />
+          <h2 className="text-xl font-bold font-heading">{editId ? "Edit Entry" : "New Entry"}</h2>
+          {editId ? (
+            <button 
+              type="button"
+              onClick={handleDelete}
+              className="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500/20 transition-all active:scale-95"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          ) : (
+            <div className="w-11" />
+          )}
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 pb-24">
@@ -169,46 +208,6 @@ export default function AddExpense() {
             </div>
           </div>
 
-          {/* Custom Category Popup */}
-          <AnimatePresence>
-            {showCustomInput && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center px-6 bg-black/40 backdrop-blur-sm"
-              >
-                <div className="bg-background w-full max-w-xs rounded-3xl p-6 shadow-2xl border border-border">
-                  <h4 className="text-lg font-bold mb-4">Custom Category</h4>
-                  <input 
-                    type="text" 
-                    value={newCatName}
-                    onChange={(e) => setNewCatName(e.target.value)}
-                    placeholder="Enter category name"
-                    className="w-full bg-secondary p-3 rounded-xl border border-border mb-4 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    autoFocus
-                  />
-                  <div className="flex gap-3">
-                    <button 
-                      type="button"
-                      onClick={() => setShowCustomInput(false)}
-                      className="flex-1 py-3 text-sm font-bold text-muted-foreground bg-secondary rounded-xl"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={handleAddCustom}
-                      className="flex-1 py-3 text-sm font-bold text-white bg-primary rounded-xl flex items-center justify-center gap-2"
-                    >
-                      Add <Check className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* Details Form */}
           <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
             <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
@@ -242,7 +241,7 @@ export default function AddExpense() {
             type="submit"
             className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl shadow-black/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
           >
-            Confirm Entry
+            {editId ? "Update Entry" : "Confirm Entry"}
           </button>
         </form>
       </MobileContainer>
