@@ -54,7 +54,8 @@ export default function AddExpense() {
       color: "bg-zinc-100 text-zinc-600"
     };
     saveCategory(newCat);
-    setCategories([...categories, newCat]);
+    const updatedCats = getCustomCategories();
+    setCategories(updatedCats);
     setSelectedCategory(newCat.id);
     setNewCatName("");
     setShowCustomInput(false);
@@ -155,12 +156,40 @@ export default function AddExpense() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="text-6xl font-bold bg-transparent border-none outline-none w-[240px] text-center placeholder:text-muted-foreground/20 font-heading"
+                className="text-6xl font-bold bg-transparent border-none outline-none w-[240px] text-center placeholder:text-muted-foreground/20 font-heading appearance-none"
                 autoFocus
                 required
               />
             </div>
           </div>
+
+          <AnimatePresence>
+            {showCustomInput && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 mb-6"
+              >
+                <div className="flex items-center gap-4">
+                  <input
+                    type="text"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    placeholder="Category name..."
+                    className="flex-1 bg-secondary/40 p-4 rounded-2xl border-none outline-none font-bold"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleAddCustom}
+                    className="w-14 h-14 bg-zinc-950 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                  >
+                    <Check className="w-6 h-6" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Categories Grid */}
           <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50">
