@@ -11,7 +11,6 @@ export default function BottomNav() {
     { href: "/", icon: Home, label: "Home" },
     { href: "/stats", icon: PieChart, label: "Stats" },
     { href: "/add", icon: Plus, label: "Add", isFab: true },
-    { href: "/profile", icon: Settings, label: "Profile" },
   ];
 
   return (

@@ -9,6 +9,7 @@ import { ArrowLeft, Calendar, FileText, Plus, Check, Trash2 } from "lucide-react
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 export default function AddExpense() {
   const [match, params] = useRoute("/add/:id?");
@@ -110,6 +111,15 @@ export default function AddExpense() {
         id: Math.random().toString(36).substring(2, 9),
         ...txData,
         date: new Date(date).toISOString(),
+      });
+    }
+
+    if (type === "income") {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#34d399', '#6ee7b7']
       });
     }
 
@@ -293,7 +303,10 @@ export default function AddExpense() {
 
           <button 
             type="submit"
-            className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
+            className={cn(
+              "w-full text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg",
+              type === "income" ? "bg-emerald-500" : "bg-zinc-950"
+            )}
           >
             {editId ? "Update Entry" : "Confirm Entry"}
           </button>
