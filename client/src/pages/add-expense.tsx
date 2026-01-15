@@ -19,6 +19,7 @@ export default function AddExpense() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [step, setStep] = useState<"date" | "amount">("date");
   const [type, setType] = useState<"expense" | "income">("expense");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [newCatName, setNewCatName] = useState("");
@@ -47,10 +48,29 @@ export default function AddExpense() {
 
   const handleAddCustom = () => {
     if (!newCatName) return;
+    
+    // Auto-select icon based on keywords
+    const lowerName = newCatName.toLowerCase();
+    let detectedIcon = "Tag";
+    if (lowerName.includes("food") || lowerName.includes("eat") || lowerName.includes("restaurant") || lowerName.includes("dinner") || lowerName.includes("lunch")) detectedIcon = "Utensils";
+    else if (lowerName.includes("car") || lowerName.includes("travel") || lowerName.includes("fuel") || lowerName.includes("petrol") || lowerName.includes("bike") || lowerName.includes("taxi")) detectedIcon = "Car";
+    else if (lowerName.includes("shop") || lowerName.includes("grocery") || lowerName.includes("buy") || lowerName.includes("clothe")) detectedIcon = "ShoppingBag";
+    else if (lowerName.includes("bill") || lowerName.includes("pay") || lowerName.includes("rent") || lowerName.includes("electricity") || lowerName.includes("water") || lowerName.includes("gas") || lowerName.includes("wifi") || lowerName.includes("internet") || lowerName.includes("phone") || lowerName.includes("mobile")) detectedIcon = "Receipt";
+    else if (lowerName.includes("health") || lowerName.includes("med") || lowerName.includes("doctor") || lowerName.includes("hospital") || lowerName.includes("pharmacy")) detectedIcon = "HeartPulse";
+    else if (lowerName.includes("game") || lowerName.includes("play") || lowerName.includes("entertainment") || lowerName.includes("movie") || lowerName.includes("fun") || lowerName.includes("netflix") || lowerName.includes("prime")) detectedIcon = "Gamepad2";
+    else if (lowerName.includes("home") || lowerName.includes("house") || lowerName.includes("flat") || lowerName.includes("room") || lowerName.includes("furniture") || lowerName.includes("decor")) detectedIcon = "Home";
+    else if (lowerName.includes("study") || lowerName.includes("book") || lowerName.includes("education") || lowerName.includes("school") || lowerName.includes("college") || lowerName.includes("course") || lowerName.includes("tutor")) detectedIcon = "BookOpen";
+    else if (lowerName.includes("salary") || lowerName.includes("paycheck") || lowerName.includes("income") || lowerName.includes("bonus") || lowerName.includes("freelance")) detectedIcon = "Wallet";
+    else if (lowerName.includes("gym") || lowerName.includes("fit") || lowerName.includes("sport") || lowerName.includes("yoga") || lowerName.includes("workout")) detectedIcon = "Dumbbell";
+    else if (lowerName.includes("gift") || lowerName.includes("present") || lowerName.includes("donation") || lowerName.includes("charity")) detectedIcon = "Gift";
+    else if (lowerName.includes("coffee") || lowerName.includes("tea") || lowerName.includes("drink") || lowerName.includes("starbucks") || lowerName.includes("cafe")) detectedIcon = "Coffee";
+    else if (lowerName.includes("party") || lowerName.includes("club") || lowerName.includes("event") || lowerName.includes("concert")) detectedIcon = "Music";
+    else if (lowerName.includes("pet") || lowerName.includes("dog") || lowerName.includes("cat") || lowerName.includes("vet")) detectedIcon = "Dog";
+
     const newCat = {
       id: Math.random().toString(36).substring(2, 9),
       name: newCatName,
-      icon: "Tag",
+      icon: detectedIcon,
       color: "bg-zinc-100 text-zinc-600"
     };
     saveCategory(newCat);
@@ -101,7 +121,7 @@ export default function AddExpense() {
       <MobileContainer className="bg-secondary/20">
         <header className="flex items-center justify-between mb-8 pt-4">
           <button 
-            onClick={() => setLocation("/")}
+            onClick={() => step === "amount" ? setStep("date") : setLocation("/")}
             className="w-11 h-11 rounded-2xl bg-background border border-border flex items-center justify-center hover:bg-accent transition-all active:scale-95"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -121,163 +141,190 @@ export default function AddExpense() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 pb-24">
-          {/* Details Form (Date and Note moved up) */}
-          <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all relative">
-              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Transaction Date</p>
-                <input 
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-sm font-bold focus:ring-0 p-0"
-                />
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Notes (Optional)</p>
-                <input 
-                  type="text" 
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="What was this for?" 
-                  className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:font-normal placeholder:text-muted-foreground/40"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Amount Hero Section */}
-          <div className="bg-background rounded-[32px] p-8 shadow-sm border border-border/50 flex flex-col items-center">
-             {/* Type Toggle */}
-            <div className="flex bg-secondary/50 p-1.5 rounded-2xl border border-border/50 w-full mb-8">
-              <button
-                type="button"
-                onClick={() => setType("expense")}
-                className={cn(
-                  "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                  type === "expense" ? "bg-zinc-950 text-white shadow-xl" : "text-muted-foreground"
-                )}
+          <AnimatePresence mode="wait">
+            {step === "date" ? (
+              <motion.div
+                key="date-step"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-6"
               >
-                Expense
-              </button>
-              <button
-                type="button"
-                onClick={() => setType("income")}
-                className={cn(
-                  "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                  type === "income" ? "bg-emerald-500 text-white shadow-xl" : "text-muted-foreground"
-                )}
-              >
-                Income
-              </button>
-            </div>
-
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Amount</p>
-            <div className="flex items-baseline text-foreground">
-              <span className="text-3xl font-bold text-primary mr-2">{currency}</span>
-              <input
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="text-6xl font-bold bg-transparent border-none outline-none w-[240px] text-center placeholder:text-muted-foreground/20 font-heading appearance-none"
-                autoFocus
-                required
-              />
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {showCustomInput && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 mb-6"
-              >
-                <div className="flex items-center gap-4">
-                  <input
-                    type="text"
-                    value={newCatName}
-                    onChange={(e) => setNewCatName(e.target.value)}
-                    placeholder="Category name..."
-                    className="flex-1 bg-secondary/40 p-4 rounded-2xl border-none outline-none font-bold"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleAddCustom}
-                    className="w-14 h-14 bg-zinc-950 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
-                  >
-                    <Check className="w-6 h-6" />
-                  </button>
+                <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all relative">
+                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Transaction Date</p>
+                      <input 
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="w-full bg-transparent border-none outline-none text-sm font-bold focus:ring-0 p-0"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Notes (Optional)</p>
+                      <input 
+                        type="text" 
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="What was this for?" 
+                        className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:font-normal placeholder:text-muted-foreground/40"
+                      />
+                    </div>
+                  </div>
                 </div>
+                <button 
+                  type="button"
+                  onClick={() => setStep("amount")}
+                  className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
+                >
+                  Continue
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="amount-step"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                {/* Amount Hero Section */}
+                <div className="bg-background rounded-[32px] p-8 shadow-sm border border-border/50 flex flex-col items-center">
+                   {/* Type Toggle */}
+                  <div className="flex bg-secondary/50 p-1.5 rounded-2xl border border-border/50 w-full mb-8">
+                    <button
+                      type="button"
+                      onClick={() => setType("expense")}
+                      className={cn(
+                        "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
+                        type === "expense" ? "bg-zinc-950 text-white shadow-xl" : "text-muted-foreground"
+                      )}
+                    >
+                      Expense
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setType("income")}
+                      className={cn(
+                        "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
+                        type === "income" ? "bg-emerald-500 text-white shadow-xl" : "text-muted-foreground"
+                      )}
+                    >
+                      Income
+                    </button>
+                  </div>
+
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Amount</p>
+                  <div className="flex items-baseline text-foreground">
+                    <span className="text-3xl font-bold text-primary mr-2">{currency}</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="text-6xl font-bold bg-transparent border-none outline-none w-[240px] text-center placeholder:text-muted-foreground/20 font-heading appearance-none"
+                      autoFocus
+                      required
+                    />
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {showCustomInput && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 mb-6"
+                    >
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="text"
+                          value={newCatName}
+                          onChange={(e) => setNewCatName(e.target.value)}
+                          placeholder="Category name..."
+                          className="flex-1 bg-secondary/40 p-4 rounded-2xl border-none outline-none font-bold"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustom}
+                          className="w-14 h-14 bg-zinc-950 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                        >
+                          <Check className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Category</h3>
+                    <button 
+                      type="button"
+                      onClick={() => setShowCustomInput(true)}
+                      className="text-primary p-1 hover:bg-primary/5 rounded-full transition-colors"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    {categories.map((cat) => {
+                      const Icon = (Icons as any)[cat.icon] || Icons.Tag;
+                      const isSelected = selectedCategory === cat.id;
+
+                      return (
+                        <motion.div
+                          key={cat.id}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={cn(
+                            "flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 relative",
+                            isSelected 
+                              ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
+                              : "border-transparent bg-secondary/40 hover:bg-secondary/60"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-sm",
+                            isSelected ? "bg-primary text-primary-foreground scale-110" : "bg-background text-muted-foreground"
+                          )}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <span className={cn(
+                            "text-[10px] font-bold text-center leading-tight uppercase tracking-wide",
+                            isSelected ? "text-primary" : "text-muted-foreground"
+                          )}>
+                            {cat.name}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
+                >
+                  {editId ? "Update Entry" : "Confirm Entry"}
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
-
-          <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Category</h3>
-              <button 
-                type="button"
-                onClick={() => setShowCustomInput(true)}
-                className="text-primary p-1 hover:bg-primary/5 rounded-full transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              {categories.map((cat) => {
-                const Icon = (Icons as any)[cat.icon] || Icons.Tag;
-                const isSelected = selectedCategory === cat.id;
-
-                return (
-                  <motion.div
-                    key={cat.id}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={cn(
-                      "flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 relative",
-                      isSelected 
-                        ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
-                        : "border-transparent bg-secondary/40 hover:bg-secondary/60"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-sm",
-                      isSelected ? "bg-primary text-primary-foreground scale-110" : "bg-background text-muted-foreground"
-                    )}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <span className={cn(
-                      "text-[10px] font-bold text-center leading-tight uppercase tracking-wide",
-                      isSelected ? "text-primary" : "text-muted-foreground"
-                    )}>
-                      {cat.name}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          <button 
-            type="submit"
-            className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl shadow-black/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
-          >
-            {editId ? "Update Entry" : "Confirm Entry"}
-          </button>
         </form>
       </MobileContainer>
     </>

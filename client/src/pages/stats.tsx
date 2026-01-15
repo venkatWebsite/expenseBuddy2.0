@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import MobileContainer from "@/components/layout/mobile-container";
 import BottomNav from "@/components/ui/bottom-nav";
 import TransactionCard from "@/components/transaction-card";
-import { getTransactions, getProfile } from "@/lib/storage";
+import { getTransactions, getProfile, getCustomCategories } from "@/lib/storage";
 import { CATEGORIES, Transaction } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 export default function Stats() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [view, setView] = useState<"pie" | "bar">("pie");
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));
 
   useEffect(() => {
     setTransactions(getTransactions());
@@ -23,28 +24,38 @@ export default function Stats() {
   const profile = getProfile();
   const currency = profile?.currency || "₹";
 
-  const expenses = transactions.filter(t => t.type === 'expense');
+  const monthTransactions = transactions.filter(t => format(new Date(t.date), "yyyy-MM") === selectedMonth);
+  const expenses = monthTransactions.filter(t => t.type === 'expense');
   const totalExpense = expenses.reduce((acc, t) => acc + t.amount, 0);
 
+  // Get unique months for selector
+  const availableMonths = Array.from(new Set(transactions.map(t => format(new Date(t.date), "yyyy-MM"))));
+  if (!availableMonths.includes(format(new Date(), "yyyy-MM"))) {
+    availableMonths.push(format(new Date(), "yyyy-MM"));
+  }
+  availableMonths.sort().reverse();
+
   // Pie Chart Data
-  const categoryTotals = CATEGORIES.map(cat => {
+  const customCats = getCustomCategories();
+  const categoryTotals = customCats.map((cat: any) => {
     const amount = expenses
-      .filter(t => t.category === cat.name)
-      .reduce((acc, t) => acc + t.amount, 0);
+      .filter((t: any) => t.category === cat.name)
+      .reduce((acc: number, t: any) => acc + t.amount, 0);
     return {
       name: cat.name,
       value: amount,
-      color: cat.color.split(' ')[1].replace('text-', ''),
+      color: cat.color?.split(' ')[1]?.replace('text-', '') || 'zinc-400',
       originalColor: cat.color,
       icon: cat.icon
     };
-  }).filter(c => c.value > 0).sort((a, b) => b.value - a.value);
+  }).filter((c: any) => c.value > 0).sort((a: any, b: any) => b.value - a.value);
 
-  // Bar Chart Data (Daily for current month)
-  const now = new Date();
+  // Bar Chart Data (Daily for selected month)
+  const monthStart = startOfMonth(new Date(selectedMonth + "-01"));
+  const monthEnd = endOfMonth(new Date(selectedMonth + "-01"));
   const daysInMonth = eachDayOfInterval({
-    start: startOfMonth(now),
-    end: endOfMonth(now)
+    start: monthStart,
+    end: monthEnd
   });
 
   const barData = daysInMonth.map(day => {
@@ -62,19 +73,30 @@ export default function Stats() {
       <MobileContainer>
         <header className="flex items-center justify-between mb-6 pt-4">
           <h2 className="text-2xl font-bold font-heading">Analytics</h2>
-          <div className="flex bg-secondary/50 p-1 rounded-xl border border-border/50">
-            <button 
-              onClick={() => setView("pie")}
-              className={cn("p-2 rounded-lg transition-all", view === "pie" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="bg-secondary/50 border border-border/50 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
             >
-              <PieIcon className="w-4 h-4" />
-            </button>
-            <button 
-              onClick={() => setView("bar")}
-              className={cn("p-2 rounded-lg transition-all", view === "bar" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-            >
-              <BarChart3 className="w-4 h-4" />
-            </button>
+              {availableMonths.map(m => (
+                <option key={m} value={m}>{format(new Date(m + "-01"), "MMM yyyy")}</option>
+              ))}
+            </select>
+            <div className="flex bg-secondary/50 p-1 rounded-xl border border-border/50">
+              <button 
+                onClick={() => setView("pie")}
+                className={cn("p-2 rounded-lg transition-all", view === "pie" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
+              >
+                <PieIcon className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setView("bar")}
+                className={cn("p-2 rounded-lg transition-all", view === "bar" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
+              >
+                <BarChart3 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -110,7 +132,7 @@ export default function Stats() {
                         dataKey="value"
                         stroke="none"
                       >
-                        {categoryTotals.map((entry, index) => (
+                        {categoryTotals.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={`var(--color-${entry.color})`} />
                         ))}
                       </Pie>
@@ -127,7 +149,6 @@ export default function Stats() {
                         axisLine={false} 
                         tickLine={false} 
                         tick={{fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))'}} 
-                        interval={4}
                       />
                       <YAxis hide />
                       <Tooltip 
@@ -149,7 +170,7 @@ export default function Stats() {
 
             <div className="space-y-4 pb-20">
               <h3 className="text-lg font-bold font-heading px-2">Breakdown</h3>
-              {categoryTotals.map((cat, i) => {
+              {categoryTotals.map((cat: any, i: number) => {
                  const Icon = (Icons as any)[cat.icon] || Icons.Tag;
                  const percent = (cat.value / totalExpense) * 100;
 

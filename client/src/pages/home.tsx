@@ -8,9 +8,11 @@ import { Transaction } from "@/lib/mock-data";
 import { Bell, TrendingUp, TrendingDown, PlusCircle, UserCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { format } from "date-fns";
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));
   const profile = getProfile();
   const currency = profile?.currency || "₹";
 
@@ -21,13 +23,21 @@ export default function Home() {
     setTransactions(sortedTx);
   }, []);
 
-  const income = transactions
+  const monthTransactions = transactions.filter(t => format(new Date(t.date), "yyyy-MM") === selectedMonth);
+
+  const income = monthTransactions
     .filter(t => t.type === 'income')
     .reduce((acc, t) => acc + t.amount, 0);
   
-  const expense = transactions
+  const expense = monthTransactions
     .filter(t => t.type === 'expense')
     .reduce((acc, t) => acc + t.amount, 0);
+
+  const availableMonths = Array.from(new Set(transactions.map(t => format(new Date(t.date), "yyyy-MM"))));
+  if (!availableMonths.includes(format(new Date(), "yyyy-MM"))) {
+    availableMonths.push(format(new Date(), "yyyy-MM"));
+  }
+  const sortedMonths = [...availableMonths].sort().reverse();
 
   const totalBalance = income - expense;
 
@@ -48,9 +58,20 @@ export default function Home() {
               <h2 className="text-base font-bold font-heading">{profile?.name || "User"}</h2>
             </div>
           </div>
-          <button className="w-11 h-11 rounded-2xl bg-secondary/50 border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary transition-all">
-            <Bell className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="bg-secondary/50 border border-border/50 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
+            >
+              {sortedMonths.map(m => (
+                <option key={m} value={m}>{format(new Date(m + "-01"), "MMM yyyy")}</option>
+              ))}
+            </select>
+            <button className="w-11 h-11 rounded-2xl bg-secondary/50 border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary transition-all">
+              <Bell className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
         {/* Balance Card - Elevated Design */}
@@ -104,7 +125,7 @@ export default function Home() {
         {/* Transaction List with AnimatePresence */}
         <div className="space-y-4">
           <AnimatePresence mode="popLayout">
-            {transactions.length === 0 ? (
+            {monthTransactions.length === 0 ? (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -113,7 +134,7 @@ export default function Home() {
                 <div className="w-20 h-20 bg-secondary/50 rounded-full flex items-center justify-center mb-6">
                   <PlusCircle className="w-10 h-10 text-muted-foreground/40 stroke-[1]" />
                 </div>
-                <p className="text-muted-foreground font-medium">Your wallet is empty.<br /><span className="text-sm opacity-60">Start by adding a transaction.</span></p>
+                <p className="text-muted-foreground font-medium">No transactions this month.<br /><span className="text-sm opacity-60">Add some spends to get started.</span></p>
                 <Link href="/add">
                   <button className="mt-6 px-8 py-3 bg-primary text-primary-foreground rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all">
                     Add Transaction
@@ -121,7 +142,7 @@ export default function Home() {
                 </Link>
               </motion.div>
             ) : (
-              transactions.map((t, i) => (
+              monthTransactions.map((t, i) => (
                 <TransactionCard key={t.id} transaction={t} index={i} />
               ))
             )}
