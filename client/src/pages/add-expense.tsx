@@ -183,7 +183,7 @@ export default function AddExpense() {
               </div>
             </div>
 
-            {/* Native Fields Section */}
+            {/* Native Date Section */}
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Date</label>
@@ -198,20 +198,51 @@ export default function AddExpense() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Category</label>
-                <div className="relative">
-                  <Plus className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full bg-secondary/30 border border-transparent focus:border-primary/20 rounded-2xl p-4 pl-11 text-sm font-bold outline-none transition-all appearance-none"
+              {/* Grid Category Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Category</label>
+                  <button 
+                    type="button"
+                    onClick={() => setShowCustomInput(true)}
+                    className="text-primary p-1 hover:bg-primary/5 rounded-full transition-colors"
                   >
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                    <option value="custom">+ Add New Category</option>
-                  </select>
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  {categories.map((cat) => {
+                    const Icon = (Icons as any)[cat.icon] || Icons.Tag;
+                    const isSelected = selectedCategory === cat.id;
+
+                    return (
+                      <motion.div
+                        key={cat.id}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={cn(
+                          "flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all duration-300",
+                          isSelected 
+                            ? "border-primary bg-primary/5 shadow-sm" 
+                            : "border-transparent bg-secondary/20 hover:bg-secondary/40"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-9 h-9 rounded-full flex items-center justify-center transition-all",
+                          isSelected ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
+                        )}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <span className={cn(
+                          "text-[9px] font-bold text-center leading-tight uppercase tracking-tight truncate w-full px-1",
+                          isSelected ? "text-primary" : "text-muted-foreground"
+                        )}>
+                          {cat.name}
+                        </span>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -232,7 +263,7 @@ export default function AddExpense() {
           </div>
 
           <AnimatePresence>
-            {(selectedCategory === "custom" || showCustomInput) && (
+            {showCustomInput && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -250,10 +281,7 @@ export default function AddExpense() {
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      handleAddCustom();
-                      if (selectedCategory === "custom") setSelectedCategory("");
-                    }}
+                    onClick={handleAddCustom}
                     className="w-12 h-12 bg-zinc-950 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
                   >
                     <Check className="w-5 h-5" />
