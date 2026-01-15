@@ -121,7 +121,7 @@ export default function AddExpense() {
       <MobileContainer className="bg-secondary/20">
         <header className="flex items-center justify-between mb-8 pt-4">
           <button 
-            onClick={() => step === "amount" ? setStep("date") : setLocation("/")}
+            onClick={() => setLocation("/")}
             className="w-11 h-11 rounded-2xl bg-background border border-border flex items-center justify-center hover:bg-accent transition-all active:scale-95"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -141,190 +141,134 @@ export default function AddExpense() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 pb-24">
-          <AnimatePresence mode="wait">
-            {step === "date" ? (
-              <motion.div
-                key="date-step"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="space-y-6"
-              >
-                <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all relative">
-                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
-                      <Calendar className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Transaction Date</p>
-                      <input 
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        className="w-full bg-transparent border-none outline-none text-sm font-bold focus:ring-0 p-0"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-2xl border border-transparent focus-within:border-primary/20 transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Notes (Optional)</p>
-                      <input 
-                        type="text" 
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                        placeholder="What was this for?" 
-                        className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:font-normal placeholder:text-muted-foreground/40"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <button 
+          {/* Main Form Card */}
+          <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 space-y-6">
+            {/* Amount Section */}
+            <div className="flex flex-col items-center py-4 border-b border-border/50">
+              <div className="flex bg-secondary/50 p-1.5 rounded-2xl border border-border/50 w-full mb-6">
+                <button
                   type="button"
-                  onClick={() => setStep("amount")}
-                  className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
-                >
-                  Continue
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="amount-step"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                {/* Amount Hero Section */}
-                <div className="bg-background rounded-[32px] p-8 shadow-sm border border-border/50 flex flex-col items-center">
-                   {/* Type Toggle */}
-                  <div className="flex bg-secondary/50 p-1.5 rounded-2xl border border-border/50 w-full mb-8">
-                    <button
-                      type="button"
-                      onClick={() => setType("expense")}
-                      className={cn(
-                        "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                        type === "expense" ? "bg-zinc-950 text-white shadow-xl" : "text-muted-foreground"
-                      )}
-                    >
-                      Expense
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setType("income")}
-                      className={cn(
-                        "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                        type === "income" ? "bg-emerald-500 text-white shadow-xl" : "text-muted-foreground"
-                      )}
-                    >
-                      Income
-                    </button>
-                  </div>
-
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Amount</p>
-                  <div className="flex items-baseline text-foreground">
-                    <span className="text-3xl font-bold text-primary mr-2">{currency}</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="text-6xl font-bold bg-transparent border-none outline-none w-[240px] text-center placeholder:text-muted-foreground/20 font-heading appearance-none"
-                      autoFocus
-                      required
-                    />
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {showCustomInput && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50 mb-6"
-                    >
-                      <div className="flex items-center gap-4">
-                        <input
-                          type="text"
-                          value={newCatName}
-                          onChange={(e) => setNewCatName(e.target.value)}
-                          placeholder="Category name..."
-                          className="flex-1 bg-secondary/40 p-4 rounded-2xl border-none outline-none font-bold"
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddCustom}
-                          className="w-14 h-14 bg-zinc-950 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
-                        >
-                          <Check className="w-6 h-6" />
-                        </button>
-                      </div>
-                    </motion.div>
+                  onClick={() => setType("expense")}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
+                    type === "expense" ? "bg-zinc-950 text-white shadow-lg" : "text-muted-foreground"
                   )}
-                </AnimatePresence>
-
-                <div className="bg-background rounded-[32px] p-7 shadow-sm border border-border/50">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Category</h3>
-                    <button 
-                      type="button"
-                      onClick={() => setShowCustomInput(true)}
-                      className="text-primary p-1 hover:bg-primary/5 rounded-full transition-colors"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    {categories.map((cat) => {
-                      const Icon = (Icons as any)[cat.icon] || Icons.Tag;
-                      const isSelected = selectedCategory === cat.id;
-
-                      return (
-                        <motion.div
-                          key={cat.id}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => setSelectedCategory(cat.id)}
-                          className={cn(
-                            "flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 relative",
-                            isSelected 
-                              ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
-                              : "border-transparent bg-secondary/40 hover:bg-secondary/60"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-sm",
-                            isSelected ? "bg-primary text-primary-foreground scale-110" : "bg-background text-muted-foreground"
-                          )}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <span className={cn(
-                            "text-[10px] font-bold text-center leading-tight uppercase tracking-wide",
-                            isSelected ? "text-primary" : "text-muted-foreground"
-                          )}>
-                            {cat.name}
-                          </span>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
                 >
-                  {editId ? "Update Entry" : "Confirm Entry"}
+                  Expense
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setType("income")}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
+                    type === "income" ? "bg-emerald-500 text-white shadow-lg" : "text-muted-foreground"
+                  )}
+                >
+                  Income
+                </button>
+              </div>
+              
+              <div className="flex items-baseline text-foreground">
+                <span className="text-2xl font-bold text-primary mr-2">{currency}</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="text-5xl font-bold bg-transparent border-none outline-none w-[180px] text-center placeholder:text-muted-foreground/20 font-heading appearance-none"
+                  autoFocus
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Native Fields Section */}
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Date</label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
+                  <input 
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full bg-secondary/30 border border-transparent focus:border-primary/20 rounded-2xl p-4 pl-11 text-sm font-bold outline-none transition-all appearance-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Category</label>
+                <div className="relative">
+                  <Plus className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full bg-secondary/30 border border-transparent focus:border-primary/20 rounded-2xl p-4 pl-11 text-sm font-bold outline-none transition-all appearance-none"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                    <option value="custom">+ Add New Category</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Notes</label>
+                <div className="relative">
+                  <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
+                  <input 
+                    type="text" 
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Optional note..." 
+                    className="w-full bg-secondary/30 border border-transparent focus:border-primary/20 rounded-2xl p-4 pl-11 text-sm font-bold outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {(selectedCategory === "custom" || showCustomInput) && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-background rounded-[32px] p-6 shadow-sm border border-border/50"
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    placeholder="New category name..."
+                    className="flex-1 bg-secondary/40 p-4 rounded-2xl border-none outline-none text-sm font-bold"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleAddCustom();
+                      if (selectedCategory === "custom") setSelectedCategory("");
+                    }}
+                    className="w-12 h-12 bg-zinc-950 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                  >
+                    <Check className="w-5 h-5" />
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
+
+          <button 
+            type="submit"
+            className="w-full bg-zinc-950 text-white font-bold py-5 rounded-[24px] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
+          >
+            {editId ? "Update Entry" : "Confirm Entry"}
+          </button>
         </form>
       </MobileContainer>
     </>
