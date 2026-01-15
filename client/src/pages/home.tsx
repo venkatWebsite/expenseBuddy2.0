@@ -10,6 +10,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { format } from "date-fns";
 
+const UserCircleIcon = UserCircle;
+const SettingsIcon = Settings;
+const AlertTriangleIcon = AlertTriangle;
+
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));

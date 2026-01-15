@@ -11,6 +11,8 @@ import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 
+const Confetti = confetti;
+
 export default function AddExpense() {
   const [match, params] = useRoute("/add/:id?");
   const editId = params?.id;

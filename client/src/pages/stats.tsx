@@ -37,18 +37,22 @@ export default function Stats() {
 
   // Pie Chart Data
   const customCats = getCustomCategories();
-  const categoryTotals = customCats.map((cat: any) => {
+  const CATEGORY_COLORS = [
+    "#F97316", "#3B82F6", "#EC4899", "#EAB308", "#A855F7", "#22C55E", 
+    "#06B6D4", "#EF4444", "#8B5CF6", "#F43F5E", "#10B981", "#6366F1"
+  ];
+
+  const categoryTotals = customCats.map((cat: any, index: number) => {
     const amount = expenses
       .filter((t: any) => t.category === cat.name)
       .reduce((acc: number, t: any) => acc + t.amount, 0);
     return {
       name: cat.name,
       value: amount,
-      color: cat.color?.split(' ')[1]?.replace('text-', '') || 'zinc-400',
-      originalColor: cat.color,
+      color: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
       icon: cat.icon
     };
-  }).filter((c: any) => c.value > 0).sort((a: any, b: any) => b.value - a.value);
+  }).filter((categoryItem: any) => categoryItem.value > 0).sort((a: any, b: any) => b.value > a.value ? -1 : 1);
 
   // Bar Chart Data (Daily for selected month)
   const monthStart = startOfMonth(new Date(selectedMonth + "-01"));
@@ -133,36 +137,43 @@ export default function Stats() {
                         stroke="none"
                       >
                         {categoryTotals.map((entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={`var(--color-${entry.color})`} />
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value: number) => [`${currency}${value.toFixed(2)}`, 'Spent']}
+                        formatter={(value: number, name: string) => [`${currency}${value.toFixed(2)}`, name]}
                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                       />
                     </PieChart>
                   ) : (
-                    <BarChart data={barData}>
-                      <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-                      <XAxis 
-                        dataKey="day" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))'}} 
-                      />
-                      <YAxis hide />
-                      <Tooltip 
-                        cursor={{fill: 'hsl(var(--secondary))', opacity: 0.4}}
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-                        formatter={(value: number) => [`${currency}${value.toFixed(2)}`, 'Daily Total']}
-                      />
-                      <Bar 
-                        dataKey="amount" 
-                        fill="hsl(var(--primary))" 
-                        radius={[6, 6, 0, 0]} 
-                        barSize={8}
-                      />
-                    </BarChart>
+                  <BarChart data={barData}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                    <XAxis 
+                      dataKey="day" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))'}} 
+                    />
+                    <YAxis hide />
+                    <Tooltip 
+                      cursor={{fill: 'hsl(var(--secondary))', opacity: 0.4}}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                      formatter={(value: number) => [`${currency}${value.toFixed(2)}`, 'Spent']}
+                    />
+                    <Bar 
+                      dataKey="amount" 
+                      radius={[6, 6, 0, 0]} 
+                      barSize={12}
+                    >
+                      {barData.map((entry: any, index: number) => {
+                        // Find the primary category for this day for coloring
+                        const dayExpenses = expenses.filter(t => isSameDay(new Date(t.date), new Date(selectedMonth + "-" + (entry.day.padStart(2, '0')))));
+                        const mainCatName = dayExpenses.length > 0 ? dayExpenses[0].category : null;
+                        const catColor = categoryTotals.find(c => c.name === mainCatName)?.color || "#CBD5E1";
+                        return <Cell key={`cell-${index}`} fill={catColor} />;
+                      })}
+                    </Bar>
+                  </BarChart>
                   )}
                 </ResponsiveContainer>
               </div>
@@ -182,7 +193,10 @@ export default function Stats() {
                     key={cat.name} 
                     className="flex items-center gap-4 p-5 bg-card rounded-[24px] border border-border/40 shadow-sm"
                    >
-                     <div className={cn("w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm", cat.originalColor)}>
+                     <div 
+                       className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
+                       style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
+                     >
                        <Icon className="w-5 h-5" />
                      </div>
                      
@@ -195,7 +209,8 @@ export default function Stats() {
                          <motion.div 
                            initial={{ width: 0 }}
                            animate={{ width: `${percent}%` }}
-                           className="h-full bg-primary rounded-full" 
+                           className="h-full rounded-full" 
+                           style={{ backgroundColor: cat.color }}
                          />
                        </div>
                      </div>
