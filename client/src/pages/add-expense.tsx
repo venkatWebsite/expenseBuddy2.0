@@ -32,6 +32,13 @@ export default function AddExpense() {
     const cats = getCustomCategories();
     setCategories(cats);
     
+    // Check for type in query params if it exists
+    const searchParams = new URLSearchParams(window.location.search);
+    const typeParam = searchParams.get('type');
+    if (typeParam === 'income' || typeParam === 'expense') {
+      setType(typeParam as "income" | "expense");
+    }
+    
     if (editId) {
       const allTx = getTransactions();
       const tx = allTx.find(t => t.id === editId);

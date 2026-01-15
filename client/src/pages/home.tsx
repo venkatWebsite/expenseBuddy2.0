@@ -114,25 +114,29 @@ export default function Home() {
             </h1>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                    <TrendingUp className="w-3 h-3" />
+              <Link href="/add?type=income">
+                <div className="bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-sm cursor-pointer hover:bg-white/10 transition-all">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <TrendingUp className="w-3 h-3" />
+                    </div>
+                    <p className="text-[11px] text-zinc-400 font-medium uppercase">Income</p>
                   </div>
-                  <p className="text-[11px] text-zinc-400 font-medium">INCOME</p>
+                  <p className="text-sm font-bold text-emerald-400">{currency}{income.toLocaleString()}</p>
                 </div>
-                <p className="text-sm font-bold text-emerald-400">{currency}{income.toLocaleString()}</p>
-              </div>
+              </Link>
 
-              <div className="bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5 h-5 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400">
-                    <TrendingDown className="w-3 h-3" />
+              <Link href="/add?type=expense">
+                <div className="bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-sm cursor-pointer hover:bg-white/10 transition-all">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-5 h-5 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400">
+                      <TrendingDown className="w-3 h-3" />
+                    </div>
+                    <p className="text-[11px] text-zinc-400 font-medium uppercase">Expenses</p>
                   </div>
-                  <p className="text-[11px] text-zinc-400 font-medium">EXPENSES</p>
+                  <p className="text-sm font-bold text-rose-400">{currency}{expense.toLocaleString()}</p>
                 </div>
-                <p className="text-sm font-bold text-rose-400">{currency}{expense.toLocaleString()}</p>
-              </div>
+              </Link>
             </div>
           </div>
         </motion.div>
