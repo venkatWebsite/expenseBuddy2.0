@@ -9,8 +9,9 @@ export default function BottomNav() {
 
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
-    { href: "/add", icon: Plus, label: "Add", isFab: true },
     { href: "/stats", icon: PieChart, label: "Stats" },
+    { href: "/add", icon: Plus, label: "Add", isFab: true },
+    { href: "/profile", icon: Settings, label: "Profile" },
   ];
 
   return (

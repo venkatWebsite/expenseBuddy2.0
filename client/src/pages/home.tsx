@@ -5,7 +5,7 @@ import BottomNav from "@/components/ui/bottom-nav";
 import TransactionCard from "@/components/transaction-card";
 import { getTransactions, getProfile } from "@/lib/storage";
 import { Transaction } from "@/lib/mock-data";
-import { Bell, TrendingUp, TrendingDown, PlusCircle, UserCircle } from "lucide-react";
+import { Bell, TrendingUp, TrendingDown, PlusCircle, UserCircle, Settings, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { format } from "date-fns";
@@ -44,6 +44,25 @@ export default function Home() {
   return (
     <>
       <MobileContainer>
+        {/* Overbudget Alert */}
+        <AnimatePresence>
+          {expense > income && income > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0, mb: 0 }}
+              animate={{ opacity: 1, height: 'auto', mb: 16 }}
+              exit={{ opacity: 0, height: 0, mb: 0 }}
+              className="px-4"
+            >
+              <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-center gap-3 text-rose-500">
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-xs font-bold leading-tight">
+                  Warning: Your expenses ({currency}{expense.toLocaleString()}) have exceeded your income ({currency}{income.toLocaleString()}) for this month.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header */}
         <header className="flex items-center justify-between mb-8 pt-4">
           <div className="flex items-center gap-4">
@@ -59,6 +78,11 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/profile">
+              <div className="w-11 h-11 rounded-2xl bg-secondary/50 border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary transition-all cursor-pointer">
+                <Settings className="w-5 h-5" />
+              </div>
+            </Link>
             <select 
               value={selectedMonth} 
               onChange={(e) => setSelectedMonth(e.target.value)}

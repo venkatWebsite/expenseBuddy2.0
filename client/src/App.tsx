@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import AddExpense from "@/pages/add-expense";
 import Stats from "@/pages/stats";
+import Profile from "@/pages/profile";
 import Onboarding from "@/pages/onboarding";
 import { getProfile } from "@/lib/storage";
 
@@ -28,6 +29,9 @@ function Router() {
       </Route>
       <Route path="/stats">
         {(params) => <ProtectedRoute component={Stats} {...params} />}
+      </Route>
+      <Route path="/profile">
+        {(params) => <ProtectedRoute component={Profile} {...params} />}
       </Route>
       <Route component={NotFound} />
     </Switch>
