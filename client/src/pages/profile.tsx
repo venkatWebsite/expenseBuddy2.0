@@ -24,10 +24,37 @@ export default function Profile() {
     forceUpdate({});
   };
 
-  const handleSave = () => {
-    saveProfile({ name, currency });
-    setIsEditing(false);
-    toast.success("Profile updated successfully!");
+  const handleSave = async () => {
+    try {
+      // Update profile on server if name changed
+      if (name !== profile?.name) {
+        const response = await fetch("/api/auth/update-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ name }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("Update error response:", error);
+          toast.error(error.error || "Failed to update profile");
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Profile updated successfully:", data);
+        toast.success("Profile updated in database!");
+      }
+
+      // Update local storage
+      saveProfile({ name, currency });
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      console.error("Save error:", err);
+      toast.error("Failed to update profile");
+    }
   };
 
   return (
@@ -128,9 +155,30 @@ export default function Profile() {
              </button>
 
              <button 
-                onClick={() => {
-                  localStorage.removeItem("expense_tracker_profile");
-                  window.location.reload();
+                onClick={async () => {
+                  try {
+                    // Call server logout endpoint to destroy session
+                    const response = await fetch("/api/auth/logout", {
+                      method: "GET",
+                      credentials: "include",
+                    });
+                    
+                    if (response.ok) {
+                      // Clear local storage
+                      localStorage.removeItem("expense_tracker_profile");
+                      localStorage.removeItem("expense_tracker_transactions");
+                      localStorage.removeItem("expense_tracker_categories");
+                      // Redirect to welcome page
+                      setLocation("/welcome");
+                    } else {
+                      toast.error("Logout failed");
+                    }
+                  } catch (err) {
+                    console.error("Logout error:", err);
+                    // Fallback: clear localStorage and reload
+                    localStorage.removeItem("expense_tracker_profile");
+                    window.location.reload();
+                  }
                 }}
                 className="w-full p-4 rounded-2xl bg-rose-500/5 flex items-center justify-between group hover:bg-rose-500/10 transition-all text-rose-500"
              >

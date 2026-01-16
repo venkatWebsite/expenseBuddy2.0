@@ -15,6 +15,15 @@ const SettingsIcon = Settings;
 const AlertTriangleIcon = AlertTriangle;
 
 export default function Home() {
+  function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour === 12) return "Good Noon,";
+    if (hour >= 5 && hour < 12) return "Good Morning,";
+    if (hour > 12 && hour < 18) return "Good Afternoon,";
+    return "Good Evening,";
+  }
+
+  const [greeting] = useState(getGreeting());
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));
   const [swipedId, setSwipedId] = useState<string | null>(null);
@@ -30,6 +39,12 @@ export default function Home() {
 
   const monthTransactions = transactions.filter(t => format(new Date(t.date), "yyyy-MM") === selectedMonth);
 
+  // starting balance = cumulative net (income - expense) from all previous months
+  const monthStart = new Date(selectedMonth + "-01");
+  const startingBalance = transactions
+    .filter(t => new Date(t.date) < monthStart)
+    .reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
+
   const income = monthTransactions
     .filter(t => t.type === 'income')
     .reduce((acc, t) => acc + t.amount, 0);
@@ -44,7 +59,8 @@ export default function Home() {
   }
   const sortedMonths = [...availableMonths].sort().reverse();
 
-  const totalBalance = income - expense;
+  // include carry-forward from previous months
+  const totalBalance = startingBalance + income - expense;
 
   return (
     <>
@@ -77,8 +93,8 @@ export default function Home() {
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-background rounded-full" />
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Good Morning,</p>
+              <div>
+              <p className="text-xs text-muted-foreground font-medium">{greeting}</p>
               <h2 className="text-base font-bold font-heading">{profile?.name || "User"}</h2>
             </div>
           </div>
