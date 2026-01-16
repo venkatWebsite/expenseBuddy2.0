@@ -83,20 +83,19 @@ export default function TransactionCard({ transaction, index, swipedId, onSwipe 
 
       {/* Confirmation Overlay */}
       {showConfirm && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-rose-500/95 backdrop-blur-sm px-6 animate-in fade-in zoom-in duration-200">
-          <div className="flex flex-col items-center gap-2 text-white text-center">
-            <AlertCircle className="w-6 h-6 mb-1" />
-            <p className="font-bold text-sm">Delete this transaction?</p>
-            <div className="flex gap-4 mt-2">
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-rose-500 backdrop-blur-md px-4 animate-in fade-in zoom-in duration-200 rounded-[inherit]">
+          <div className="flex flex-col items-center gap-1.5 text-white text-center w-full">
+            <p className="font-bold text-[13px] leading-tight mb-1">Delete this transaction?</p>
+            <div className="flex gap-3 w-full max-w-[200px] justify-center">
               <button 
                 onClick={cancelDelete}
-                className="px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold transition-colors"
+                className="flex-1 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-[11px] font-bold transition-colors whitespace-nowrap"
               >
                 Cancel
               </button>
               <button 
                 onClick={confirmDelete}
-                className="px-4 py-1.5 rounded-full bg-white text-rose-500 hover:bg-zinc-100 text-xs font-bold transition-colors shadow-lg"
+                className="flex-1 py-2 rounded-xl bg-white text-rose-500 hover:bg-zinc-100 text-[11px] font-bold transition-colors shadow-lg whitespace-nowrap"
               >
                 Delete
               </button>
