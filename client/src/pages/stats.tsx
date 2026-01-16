@@ -28,7 +28,10 @@ export default function Stats() {
 
   const monthTransactions = transactions.filter(t => format(new Date(t.date), "yyyy-MM") === selectedMonth);
   const expenses = monthTransactions.filter(t => t.type === 'expense');
+  const incomeTransactions = monthTransactions.filter(t => t.type === 'income');
   const totalExpense = expenses.reduce((acc, t) => acc + t.amount, 0);
+  const income = incomeTransactions.reduce((acc, t) => acc + t.amount, 0);
+  const totalBalance = income - totalExpense;
 
   // Get unique months for selector
   const availableMonths = Array.from(new Set(transactions.map(t => format(new Date(t.date), "yyyy-MM"))));
@@ -118,8 +121,32 @@ export default function Stats() {
     // Summary
     doc.setFontSize(12);
     doc.text(`Total Income: ${currency}${income.toLocaleString()}`, 14, 32);
-    doc.text(`Total Expenses: ${currency}${expense.toLocaleString()}`, 14, 40);
+    doc.text(`Total Expenses: ${currency}${totalExpense.toLocaleString()}`, 14, 40);
     doc.text(`Net Balance: ${currency}${totalBalance.toLocaleString()}`, 14, 48);
+
+    let currentY = 55;
+    
+    // Simple Pictorial Breakdown
+    if (totalExpense > 0) {
+      doc.setFontSize(14);
+      doc.text("Expense Breakdown", 14, currentY);
+      currentY += 10;
+      
+      categoryTotals.forEach((cat: any) => {
+        const barWidth = (cat.value / totalExpense) * 120;
+        const hex = cat.color;
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        
+        doc.setFillColor(r, g, b);
+        doc.rect(14, currentY, barWidth, 6, 'F');
+        doc.setFontSize(8);
+        doc.text(`${cat.name}: ${currency}${cat.value.toLocaleString()} (${Math.round((cat.value/totalExpense)*100)}%)`, 14 + barWidth + 3, currentY + 4.5);
+        currentY += 10;
+      });
+      currentY += 5;
+    }
 
     // Table
     const tableData = monthTransactions.map(t => [
@@ -131,7 +158,7 @@ export default function Stats() {
     ]);
 
     autoTable(doc, {
-      startY: 55,
+      startY: currentY,
       head: [["Date", "Category", "Note", "Type", "Amount"]],
       body: tableData,
       theme: 'grid',
@@ -256,7 +283,7 @@ export default function Stats() {
                         // Find the primary category for this day for coloring
                         const dayExpenses = expenses.filter(t => isSameDay(new Date(t.date), new Date(selectedMonth + "-" + (entry.day.padStart(2, '0')))));
                         const mainCatName = dayExpenses.length > 0 ? dayExpenses[0].category : null;
-                        const catColor = categoryTotals.find(c => c.name === mainCatName)?.color || "#CBD5E1";
+                        const catColor = categoryTotals.find((c: any) => c.name === mainCatName)?.color || "#CBD5E1";
                         return <Cell key={`cell-${index}`} fill={catColor} />;
                       })}
                     </Bar>

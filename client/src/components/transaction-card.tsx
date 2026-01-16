@@ -25,11 +25,12 @@ export default function TransactionCard({ transaction, index }: TransactionCardP
   const editOpacity = useTransform(x, [50, 100], [0, 1]);
 
   const handleDragEnd = (_: any, info: any) => {
-    // Increased threshold to 140 to avoid accidental swipes
-    if (info.offset.x < -140) {
+    // "Full swipe" threshold - requires swiping across most of the screen
+    const threshold = 320; 
+    if (info.offset.x < -threshold) {
       deleteTransaction(transaction.id);
       window.location.reload(); 
-    } else if (info.offset.x > 140) {
+    } else if (info.offset.x > threshold) {
       setLocation(`/add/${transaction.id}`);
     }
   };
@@ -50,8 +51,8 @@ export default function TransactionCard({ transaction, index }: TransactionCardP
 
       <motion.div
         drag="x"
-        dragConstraints={{ left: -160, right: 160 }}
-        dragElastic={0.05}
+        dragConstraints={{ left: -360, right: 360 }}
+        dragElastic={0.03}
         style={{ x }}
         onDragEnd={handleDragEnd}
         initial={{ opacity: 0, x: -10 }}
