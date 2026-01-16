@@ -56,9 +56,11 @@ class MongoStorage implements IStorage {
 
   private extractDbNameFromUri(uri: string) {
     try {
-      const u = new URL(uri.replace("mongodb+srv://", "https://"));
+      const sanitizedUri = uri.replace(/mongodb\+srv:\/\//, "https://");
+      const u = new URL(sanitizedUri);
       return u.pathname && u.pathname !== "/" ? u.pathname.slice(1) : undefined;
     } catch {
+      console.warn("Invalid MongoDB URI provided.");
       return undefined;
     }
   }
