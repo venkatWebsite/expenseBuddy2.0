@@ -17,6 +17,7 @@ const AlertTriangleIcon = AlertTriangle;
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));
+  const [swipedId, setSwipedId] = useState<string | null>(null);
   const profile = getProfile();
   const currency = profile?.currency || "₹";
 
@@ -172,7 +173,13 @@ export default function Home() {
               </motion.div>
             ) : (
               monthTransactions.map((t, i) => (
-                <TransactionCard key={t.id} transaction={t} index={i} />
+                <TransactionCard 
+                  key={t.id} 
+                  transaction={t} 
+                  index={i} 
+                  swipedId={swipedId}
+                  onSwipe={setSwipedId}
+                />
               ))
             )}
           </AnimatePresence>

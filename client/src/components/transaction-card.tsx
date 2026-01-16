@@ -7,32 +7,63 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useLocation } from "wouter";
-import { Trash2, Edit2 } from "lucide-react";
+import { Trash2, Edit2, AlertCircle } from "lucide-react";
 
 interface TransactionCardProps {
   transaction: Transaction;
   index: number;
+  swipedId: string | null;
+  onSwipe: (id: string | null) => void;
 }
 
-export default function TransactionCard({ transaction, index }: TransactionCardProps) {
+export default function TransactionCard({ transaction, index, swipedId, onSwipe }: TransactionCardProps) {
   const [_, setLocation] = useLocation();
+  const [showConfirm, setShowConfirm] = React.useState(false);
   const IconComponent = (Icons as any)[transaction.icon] || Icons.Tag;
   const profile = getProfile();
   const currency = profile?.currency || "₹";
 
   const x = useMotionValue(0);
-  const deleteOpacity = useTransform(x, [-100, -50], [1, 0]);
-  const editOpacity = useTransform(x, [50, 100], [0, 1]);
+  
+  // Opacity controls: Show text at 30% swipe, full action at 100%
+  const deleteOpacity = useTransform(x, [-120, -60], [1, 0]);
+  const editOpacity = useTransform(x, [60, 120], [0, 1]);
+  
+  // Auto-reset when another item is swiped
+  React.useEffect(() => {
+    if (swipedId !== transaction.id && x.get() !== 0) {
+      x.set(0);
+    }
+  }, [swipedId, transaction.id, x]);
+
+  const handleDragStart = () => {
+    onSwipe(transaction.id);
+  };
 
   const handleDragEnd = (_: any, info: any) => {
-    // "Full swipe" threshold - requires swiping across most of the screen
-    const threshold = 320; 
+    const threshold = 280; 
     if (info.offset.x < -threshold) {
-      deleteTransaction(transaction.id);
-      window.location.reload(); 
+      setShowConfirm(true);
+      // Stay swiped open during confirmation
+      x.set(-threshold);
     } else if (info.offset.x > threshold) {
       setLocation(`/add/${transaction.id}`);
+    } else {
+      // Reset if threshold not met
+      x.set(0);
+      onSwipe(null);
     }
+  };
+
+  const confirmDelete = () => {
+    deleteTransaction(transaction.id);
+    window.location.reload();
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(false);
+    x.set(0);
+    onSwipe(null);
   };
 
   return (
@@ -49,11 +80,36 @@ export default function TransactionCard({ transaction, index }: TransactionCardP
         </motion.div>
       </div>
 
+      {/* Confirmation Overlay */}
+      {showConfirm && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-rose-500/90 backdrop-blur-sm px-6 animate-in fade-in zoom-in duration-200">
+          <div className="flex flex-col items-center gap-2 text-white text-center">
+            <AlertCircle className="w-6 h-6 mb-1" />
+            <p className="font-bold text-sm">Delete this transaction?</p>
+            <div className="flex gap-4 mt-2">
+              <button 
+                onClick={cancelDelete}
+                className="px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="px-4 py-1.5 rounded-full bg-white text-rose-500 hover:bg-zinc-100 text-xs font-bold transition-colors shadow-lg"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <motion.div
         drag="x"
         dragConstraints={{ left: -360, right: 360 }}
         dragElastic={0.03}
         style={{ x }}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
