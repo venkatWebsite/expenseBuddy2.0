@@ -7,7 +7,7 @@ import { getTransactions, getProfile, getCustomCategories } from "@/lib/storage"
 import { CATEGORIES, Transaction } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
-import { ChevronRight, Filter, PieChart as PieIcon, TrendingUp, BarChart3 } from "lucide-react";
+import { ChevronRight, Filter, PieChart as PieIcon, TrendingUp, BarChart3, Download } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
 import { motion } from "framer-motion";
@@ -72,11 +72,50 @@ export default function Stats() {
     };
   });
 
+  const handleExportCSV = () => {
+    if (monthTransactions.length === 0) {
+      return;
+    }
+
+    const headers = ["Date", "Type", "Category", "Amount", "Note"];
+    const rows = monthTransactions.map(t => [
+      format(new Date(t.date), "yyyy-MM-dd"),
+      t.type,
+      t.category,
+      t.amount,
+      t.note || ""
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `expenses_${selectedMonth}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <MobileContainer>
         <header className="flex items-center justify-between mb-6 pt-4">
-          <h2 className="text-2xl font-bold font-heading">Analytics</h2>
+          <div className="flex flex-col">
+            <h2 className="text-2xl font-bold font-heading">Analytics</h2>
+            <button 
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider mt-1 hover:opacity-80 transition-opacity"
+            >
+              <Download className="w-3 h-3" />
+              Export CSV
+            </button>
+          </div>
           <div className="flex items-center gap-3">
             <select 
               value={selectedMonth} 
