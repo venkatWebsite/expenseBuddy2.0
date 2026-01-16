@@ -83,7 +83,7 @@ export default function TransactionCard({ transaction, index, swipedId, onSwipe 
 
       {/* Confirmation Overlay */}
       {showConfirm && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-rose-500/90 backdrop-blur-sm px-6 animate-in fade-in zoom-in duration-200">
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-rose-500/95 backdrop-blur-sm px-6 animate-in fade-in zoom-in duration-200">
           <div className="flex flex-col items-center gap-2 text-white text-center">
             <AlertCircle className="w-6 h-6 mb-1" />
             <p className="font-bold text-sm">Delete this transaction?</p>
@@ -116,7 +116,7 @@ export default function TransactionCard({ transaction, index, swipedId, onSwipe 
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 10 }}
         transition={{ delay: index * 0.05, duration: 0.2 }}
-        className="relative z-10 group flex items-center gap-4 p-5 bg-background rounded-3xl border border-border/50 shadow-sm active:scale-[0.98] transition-all hover:bg-secondary/10 cursor-pointer touch-pan-y"
+        className="relative z-10 group flex items-center gap-4 p-5 bg-card rounded-3xl border border-border/50 shadow-sm active:scale-[0.98] transition-all hover:bg-secondary/10 cursor-pointer touch-pan-y"
         data-testid={`transaction-card-${transaction.id}`}
       >
         <div className={cn(

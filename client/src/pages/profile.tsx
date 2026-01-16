@@ -8,12 +8,21 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
+import * as Icons from "lucide-react";
+
 export default function Profile() {
   const [_, setLocation] = useLocation();
   const profile = getProfile();
   const [name, setName] = useState(profile?.name || "");
   const [currency, setCurrency] = useState(profile?.currency || "₹");
   const [isEditing, setIsEditing] = useState(false);
+  const [, forceUpdate] = useState({});
+
+  const toggleDarkMode = () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    forceUpdate({});
+  };
 
   const handleSave = () => {
     saveProfile({ name, currency });
@@ -91,6 +100,21 @@ export default function Profile() {
           </div>
 
           <div className="space-y-3">
+             <button 
+                onClick={toggleDarkMode}
+                className="w-full p-4 rounded-2xl bg-secondary/20 flex items-center justify-between group hover:bg-secondary/40 transition-all"
+             >
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm group-hover:scale-110 transition-transform">
+                      {document.documentElement.classList.contains('dark') ? <Icons.Sun className="w-5 h-5" /> : <Icons.Moon className="w-5 h-5" />}
+                   </div>
+                   <span className="text-sm font-bold">Dark Mode</span>
+                </div>
+                <div className={`w-10 h-6 rounded-full relative transition-colors ${document.documentElement.classList.contains('dark') ? 'bg-primary' : 'bg-zinc-300'}`}>
+                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${document.documentElement.classList.contains('dark') ? 'right-1' : 'left-1'}`} />
+                </div>
+             </button>
+
              <button className="w-full p-4 rounded-2xl bg-secondary/20 flex items-center justify-between group hover:bg-secondary/40 transition-all">
                 <div className="flex items-center gap-3">
                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary/60 shadow-sm group-hover:scale-110 transition-transform">
