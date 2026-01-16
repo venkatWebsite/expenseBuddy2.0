@@ -149,7 +149,9 @@ export default function Home() {
         {/* Section Title */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold font-heading">Recent History</h3>
-          <button className="text-sm font-bold text-primary hover:opacity-80 transition-opacity">View All</button>
+          <Link href="/stats">
+            <button className="text-sm font-bold text-primary hover:opacity-80 transition-opacity">View All</button>
+          </Link>
         </div>
 
         {/* Transaction List with AnimatePresence */}

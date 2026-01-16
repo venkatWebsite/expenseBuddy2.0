@@ -29,13 +29,14 @@ export default function TransactionCard({ transaction, index, swipedId, onSwipe 
   const deleteOpacity = useTransform(x, [-100, -20], [1, 0]);
   const editOpacity = useTransform(x, [20, 100], [0, 1]);
   
-  // Auto-reset when another item is swiped
+  // Auto-reset when another item is swiped or if this one is already open and user starts another action
   React.useEffect(() => {
-    if (swipedId !== transaction.id && x.get() !== 0 && !showConfirm) {
+    if (swipedId !== transaction.id && x.get() !== 0) {
+      setShowConfirm(false);
       x.stop();
       animate(x, 0, { type: "spring", stiffness: 300, damping: 30 });
     }
-  }, [swipedId, transaction.id, showConfirm]);
+  }, [swipedId, transaction.id, x]);
 
   const handleDragStart = () => {
     onSwipe(transaction.id);
