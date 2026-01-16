@@ -5,7 +5,7 @@ import { Transaction } from "@/lib/mock-data";
 import { getProfile, deleteTransaction } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useLocation } from "wouter";
 import { Trash2, Edit2, AlertCircle } from "lucide-react";
 
@@ -25,33 +25,34 @@ export default function TransactionCard({ transaction, index, swipedId, onSwipe 
 
   const x = useMotionValue(0);
   
-  // Opacity controls: Show text at 30% swipe, full action at 100%
-  const deleteOpacity = useTransform(x, [-120, -60], [1, 0]);
-  const editOpacity = useTransform(x, [60, 120], [0, 1]);
+  // Opacity controls: reveal text quickly at 15% swipe
+  const deleteOpacity = useTransform(x, [-100, -20], [1, 0]);
+  const editOpacity = useTransform(x, [20, 100], [0, 1]);
   
   // Auto-reset when another item is swiped
   React.useEffect(() => {
-    if (swipedId !== transaction.id && x.get() !== 0) {
-      x.set(0);
+    if (swipedId !== transaction.id && x.get() !== 0 && !showConfirm) {
+      x.stop();
+      animate(x, 0, { type: "spring", stiffness: 300, damping: 30 });
     }
-  }, [swipedId, transaction.id, x]);
+  }, [swipedId, transaction.id, showConfirm]);
 
   const handleDragStart = () => {
     onSwipe(transaction.id);
   };
 
   const handleDragEnd = (_: any, info: any) => {
-    const threshold = 280; 
+    const threshold = 220; 
     if (info.offset.x < -threshold) {
       setShowConfirm(true);
-      // Stay swiped open during confirmation
-      x.set(-threshold);
+      animate(x, -threshold, { type: "spring", stiffness: 300, damping: 30 });
     } else if (info.offset.x > threshold) {
       setLocation(`/add/${transaction.id}`);
+      animate(x, 0, { type: "spring", stiffness: 300, damping: 30 });
     } else {
-      // Reset if threshold not met
-      x.set(0);
-      onSwipe(null);
+      animate(x, 0, { type: "spring", stiffness: 300, damping: 30 });
+      // Don't clear onSwipe(null) immediately to allow the animation to finish
+      setTimeout(() => onSwipe(null), 200);
     }
   };
 

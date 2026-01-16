@@ -112,28 +112,55 @@ export default function Stats() {
 
     const doc = new jsPDF();
     const monthName = format(new Date(selectedMonth + "-01"), "MMMM yyyy");
+    const safeCurrency = currency === "₹" ? "Rs." : currency;
 
-    // Title
-    doc.setFontSize(20);
-    doc.setTextColor(24, 24, 27); // zinc-900
-    doc.text(`Expense Report - ${monthName}`, 14, 22);
-
-    // Summary
-    doc.setFontSize(12);
-    doc.text(`Total Income: ${currency}${income.toLocaleString()}`, 14, 32);
-    doc.text(`Total Expenses: ${currency}${totalExpense.toLocaleString()}`, 14, 40);
-    doc.text(`Net Balance: ${currency}${totalBalance.toLocaleString()}`, 14, 48);
-
-    let currentY = 55;
+    // Header with Profile Details
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(24, 24, 27);
+    doc.text("EXPENSE REPORT", 14, 22);
     
-    // Simple Pictorial Breakdown
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`Prepared for: ${profile?.name || "User"}`, 14, 28);
+    doc.text(`Period: ${monthName}`, 14, 33);
+    doc.text(`Generated on: ${format(new Date(), "PPP p")}`, 14, 38);
+
+    // Summary Box
+    doc.setDrawColor(240);
+    doc.setFillColor(250);
+    doc.roundedRect(14, 45, 182, 35, 3, 3, 'FD');
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(24, 24, 27);
+    doc.text("Financial Summary", 20, 52);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Total Income:`, 20, 60);
+    doc.text(`${safeCurrency} ${income.toLocaleString()}`, 190, 60, { align: 'right' });
+    
+    doc.text(`Total Expenses:`, 20, 66);
+    doc.text(`${safeCurrency} ${totalExpense.toLocaleString()}`, 190, 66, { align: 'right' });
+    
+    doc.setFont("helvetica", "bold");
+    doc.text(`Net Balance:`, 20, 74);
+    doc.text(`${safeCurrency} ${totalBalance.toLocaleString()}`, 190, 74, { align: 'right' });
+
+    let currentY = 90;
+    
+    // Pictorial Breakdown
     if (totalExpense > 0) {
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
-      doc.text("Expense Breakdown", 14, currentY);
+      doc.text("Expense Breakdown by Category", 14, currentY);
       currentY += 10;
       
       categoryTotals.forEach((cat: any) => {
-        const barWidth = (cat.value / totalExpense) * 120;
+        const barMaxWidth = 140;
+        const barWidth = (cat.value / totalExpense) * barMaxWidth;
         const hex = cat.color;
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
@@ -141,9 +168,15 @@ export default function Stats() {
         
         doc.setFillColor(r, g, b);
         doc.rect(14, currentY, barWidth, 6, 'F');
-        doc.setFontSize(8);
-        doc.text(`${cat.name}: ${currency}${cat.value.toLocaleString()} (${Math.round((cat.value/totalExpense)*100)}%)`, 14 + barWidth + 3, currentY + 4.5);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text(`${cat.name}: ${safeCurrency} ${cat.value.toLocaleString()} (${Math.round((cat.value/totalExpense)*100)}%)`, 14 + barWidth + 3, currentY + 4.5);
         currentY += 10;
+        
+        if (currentY > 270) {
+          doc.addPage();
+          currentY = 20;
+        }
       });
       currentY += 5;
     }
@@ -154,7 +187,7 @@ export default function Stats() {
       t.category,
       t.note || "-",
       t.type.toUpperCase(),
-      `${currency}${t.amount.toLocaleString()}`
+      `${safeCurrency} ${t.amount.toLocaleString()}`
     ]);
 
     autoTable(doc, {
@@ -162,10 +195,19 @@ export default function Stats() {
       head: [["Date", "Category", "Note", "Type", "Amount"]],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [24, 24, 27] as [number, number, number] },
+      headStyles: { fillColor: [24, 24, 27], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 9 },
+      didDrawPage: (data) => {
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Page ${data.pageNumber}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+        doc.text("Personal Expense Tracker", 14, doc.internal.pageSize.height - 10);
+      }
     });
 
-    doc.save(`report_${selectedMonth}.pdf`);
+    const fileName = `Expense_Report_${profile?.name || "User"}_${monthName.replace(" ", "_")}.pdf`;
+    doc.save(fileName);
   };
 
   return (
