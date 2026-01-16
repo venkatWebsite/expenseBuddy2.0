@@ -132,7 +132,7 @@ export default function Onboarding() {
           {/* Google Sign In */}
           <button
             type="button"
-            onClick={() => (window.location.href = "/auth/google")}
+            onClick={() => (window.location.href = "https://expensebuddy-api.onrender.com/auth/google")}
             className="
               w-full
               bg-white/95
