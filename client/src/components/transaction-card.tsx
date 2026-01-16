@@ -25,10 +25,11 @@ export default function TransactionCard({ transaction, index }: TransactionCardP
   const editOpacity = useTransform(x, [50, 100], [0, 1]);
 
   const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.x < -100) {
+    // Increased threshold to 140 to avoid accidental swipes
+    if (info.offset.x < -140) {
       deleteTransaction(transaction.id);
       window.location.reload(); 
-    } else if (info.offset.x > 100) {
+    } else if (info.offset.x > 140) {
       setLocation(`/add/${transaction.id}`);
     }
   };
@@ -49,8 +50,8 @@ export default function TransactionCard({ transaction, index }: TransactionCardP
 
       <motion.div
         drag="x"
-        dragConstraints={{ left: -120, right: 120 }}
-        dragElastic={0.1}
+        dragConstraints={{ left: -160, right: 160 }}
+        dragElastic={0.05}
         style={{ x }}
         onDragEnd={handleDragEnd}
         initial={{ opacity: 0, x: -10 }}

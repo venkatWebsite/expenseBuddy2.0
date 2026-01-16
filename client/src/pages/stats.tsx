@@ -7,10 +7,12 @@ import { getTransactions, getProfile, getCustomCategories } from "@/lib/storage"
 import { CATEGORIES, Transaction } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
-import { ChevronRight, Filter, PieChart as PieIcon, TrendingUp, BarChart3, Download } from "lucide-react";
+import { ChevronRight, Filter, PieChart as PieIcon, TrendingUp, BarChart3, Download, FileText } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
 import { motion } from "framer-motion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function Stats() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -102,19 +104,65 @@ export default function Stats() {
     document.body.removeChild(link);
   };
 
+  const handleExportPDF = () => {
+    if (monthTransactions.length === 0) return;
+
+    const doc = new jsPDF();
+    const monthName = format(new Date(selectedMonth + "-01"), "MMMM yyyy");
+
+    // Title
+    doc.setFontSize(20);
+    doc.setTextColor(24, 24, 27); // zinc-900
+    doc.text(`Expense Report - ${monthName}`, 14, 22);
+
+    // Summary
+    doc.setFontSize(12);
+    doc.text(`Total Income: ${currency}${income.toLocaleString()}`, 14, 32);
+    doc.text(`Total Expenses: ${currency}${expense.toLocaleString()}`, 14, 40);
+    doc.text(`Net Balance: ${currency}${totalBalance.toLocaleString()}`, 14, 48);
+
+    // Table
+    const tableData = monthTransactions.map(t => [
+      format(new Date(t.date), "dd MMM yyyy"),
+      t.category,
+      t.note || "-",
+      t.type.toUpperCase(),
+      `${currency}${t.amount.toLocaleString()}`
+    ]);
+
+    autoTable(doc, {
+      startY: 55,
+      head: [["Date", "Category", "Note", "Type", "Amount"]],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [24, 24, 27] as [number, number, number] },
+    });
+
+    doc.save(`report_${selectedMonth}.pdf`);
+  };
+
   return (
     <>
       <MobileContainer>
         <header className="flex items-center justify-between mb-6 pt-4">
           <div className="flex flex-col">
             <h2 className="text-2xl font-bold font-heading">Analytics</h2>
-            <button 
-              onClick={handleExportCSV}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider mt-1 hover:opacity-80 transition-opacity"
-            >
-              <Download className="w-3 h-3" />
-              Export CSV
-            </button>
+            <div className="flex gap-3 mt-1">
+              <button 
+                onClick={handleExportCSV}
+                className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider hover:opacity-80 transition-opacity"
+              >
+                <Download className="w-3 h-3" />
+                CSV
+              </button>
+              <button 
+                onClick={handleExportPDF}
+                className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider hover:opacity-80 transition-opacity"
+              >
+                <FileText className="w-3 h-3" />
+                PDF
+              </button>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <select 
